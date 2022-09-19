@@ -2,6 +2,7 @@ package com.javadi.kafka.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.javadi.kafka.entity.CarLocation;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,28 +39,21 @@ public class KafkaConfig {
 		return new DefaultKafkaConsumerFactory<>(properties);
 	}
 
-//	@Bean(name = "farLocationContainerFactory")
-//	public ConcurrentKafkaListenerContainerFactory<Object, Object> farLocationContainerFactory(
-//			ConcurrentKafkaListenerContainerFactoryConfigurer configurer) {
-//		var factory = new ConcurrentKafkaListenerContainerFactory<Object, Object>();
-//		configurer.configure(factory, consumerFactory());
-//
-//		factory.setRecordFilterStrategy(new RecordFilterStrategy<Object, Object>() {
-//
-//			@Override
-//			public boolean filter(ConsumerRecord<Object, Object> consumerRecord) {
-//				try {
-//					CarLocation carLocation = objectMapper.readValue(consumerRecord.value().toString(),
-//							CarLocation.class);
-//					return carLocation.getDistance() <= 100;
-//				} catch (JsonProcessingException e) {
-//					return false;
-//				}
-//			}
-//		});
-//
-//		return factory;
-//	}
+	@Bean(name = "farLocationContainerFactory")
+	public ConcurrentKafkaListenerContainerFactory<Object, Object> farLocationContainerFactory(ConcurrentKafkaListenerContainerFactoryConfigurer configurer) {
+		ConcurrentKafkaListenerContainerFactory<Object, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+		configurer.configure(factory, consumerFactory());
+		factory.setRecordFilterStrategy(consumerRecord -> {
+			try {
+				CarLocation carLocation = objectMapper.readValue(consumerRecord.value().toString(), CarLocation.class);
+				// if true, message will be filtered
+				return carLocation.getDistance() <= 100;
+			} catch (JsonProcessingException e) {
+				return false;
+			}
+		});
+		return factory;
+	}
 
 //	@Bean(name = "kafkaListenerContainerFactory")
 //	public ConcurrentKafkaListenerContainerFactory<Object, Object> kafkaListenerContainerFactory(
