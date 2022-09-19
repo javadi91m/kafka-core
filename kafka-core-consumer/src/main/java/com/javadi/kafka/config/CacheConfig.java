@@ -17,6 +17,7 @@ public class CacheConfig {
 		return Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(2)).maximumSize(1000).build();
 	}
 
+	// key is a POJO (PaymentRequestCacheKey)
 	@Bean(name = "cachePaymentRequest")
 	public Cache<PaymentRequestCacheKey, Boolean> cachePaymentRequest() {
 		return Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(2)).maximumSize(1000).build();
